@@ -14,7 +14,16 @@ namespace StringCalculatorBLL
             {
                 return 0;
             }
-            var numbers = input.Split(new[] {",",@"\n"}, StringSplitOptions.RemoveEmptyEntries);
+
+            var delimiters = new List<string>() {",", @"\n"};
+
+            var additionalDelimiter = GetSingleDelimiterIfExist(input);
+            if (additionalDelimiter != string.Empty)
+            {
+                delimiters.Add(additionalDelimiter);
+            }
+
+            var numbers = input.Split(delimiters.ToArray(), StringSplitOptions.RemoveEmptyEntries);
 
             return SumInternal(numbers);
         }
@@ -47,6 +56,22 @@ namespace StringCalculatorBLL
             }
 
             return sum;
+        }
+
+        private static string GetSingleDelimiterIfExist(string input)
+        {
+            string additionalDelimiter = string.Empty;
+            if (input.StartsWith(@"//"))
+            {
+                var endDelimiter = input.IndexOf(@"\n", StringComparison.InvariantCulture);
+
+                if (endDelimiter == 3)
+                {
+                    return input.Substring(2,1);
+                }
+            }
+
+            return additionalDelimiter;
         }
     }
 }

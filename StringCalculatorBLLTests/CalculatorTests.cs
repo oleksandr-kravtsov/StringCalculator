@@ -99,13 +99,13 @@ namespace StringCalculatorBLLTests
         [InlineData("-1,-2,-3,-4,-5,-6,-7,-8,-9,-10,-11,-12")]
         [InlineData(@"1,2,3,4,-5,6\n7,8,9","-5")]
         [Theory]
-        public void ExceptionWhenNegativeNumbers(string input, string expectedExceptionList = "")
+        public void ExceptionWhenNegativeNumbersTest(string input, string expectedExceptionList = "")
         {
             //Act
             var exception = Assert.Throws<ArgumentException>(() => _calculator.Add(input));
 
             //Assert
-            Assert.True(exception.Message.Contains(expectedExceptionList));
+            Assert.Contains(expectedExceptionList, exception.Message);
         }
 
 
@@ -119,12 +119,45 @@ namespace StringCalculatorBLLTests
             {
                 sb.Append(i+",");
             }
+            var expected = maxNumber * (maxNumber + 1) / 2;
+
             //Act
             var actualResult = _calculator.Add(sb.ToString());
-
-            var expected = maxNumber * (maxNumber + 1) / 2;
+            
             //Assert
             Assert.Equal(expected, actualResult);
+        }
+
+
+        [InlineData(@"//;\n2;5", 7)]
+        [InlineData(@"// \n8 1", 9)]
+        [InlineData(@"//#\n2#5,3\n10", 20)]
+        [InlineData(@"//!\n2!5,3\n10;3", 10)]
+        [Theory]
+        public void CustomSingleCharacterPositiveTest(string input, long expectedResult)
+        {
+            //Act
+            var actualResult = _calculator.Add(input);
+
+            //Assert
+            Assert.Equal(expectedResult, actualResult);
+        }
+
+
+        [InlineData(@"/;\n2;5;3", 0)]
+        [InlineData(@"//\n1,2", 3)]
+        [InlineData(@"//1,2", 2)]
+        [InlineData(@"//", 0)]
+        [InlineData(@"//;\r2;5;3", 0)]
+        [InlineData(@"//;#\n2;5;3", 0)]
+        [Theory]
+        public void CustomSingleCharacterNegativeTest(string input, long expectedResult)
+        {
+            //Act
+            var actualResult = _calculator.Add(input);
+
+            //Assert
+            Assert.Equal(expectedResult, actualResult);
         }
 
     }
