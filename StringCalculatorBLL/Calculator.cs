@@ -6,6 +6,10 @@ namespace StringCalculatorBLL
     {
         public long Add(string input)
         {
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                return 0;
+            }
             var numbers = input.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries);
             long sum = 0;
             foreach (var s in numbers)
