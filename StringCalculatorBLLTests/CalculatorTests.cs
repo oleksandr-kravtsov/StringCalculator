@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using StringCalculatorBLL;
 using Xunit;
 
@@ -14,8 +15,8 @@ namespace StringCalculatorBLLTests
 
         [InlineData("20", 20)]
         [InlineData("0,0", 0)]
-        [InlineData("1,5000", 5001)]
-        [InlineData("5000000000,5000000000", 10000000000L)]
+        [InlineData("1,5000", 1)]
+        [InlineData("5000000000,5000000000", 0)]
         [Theory]
         public void SimplePositiveAddTest(string input, long expectedResult)
         {
@@ -54,8 +55,10 @@ namespace StringCalculatorBLLTests
         [InlineData("20,30,50", 100)]
         [InlineData(@"1\n2,3", 6)]
         [InlineData(@"20,30,50\n80", 180)]
+        [InlineData(@"2,1001\n6", 8)]
+        [InlineData("1,10,1000", 1011)]
         [InlineData("1,2,3,4,5,6,7,8,9,10,11,12", 78)]
-        [InlineData("5000000000,5000000000,5000000000,5000000000", 20000000000L)]
+        [InlineData("5000000000,5000000000,5000000000,5000000000", 0)]
         [Theory]
         public void MultiplePositiveAddTest(string input, long expectedResult)
         {
@@ -103,6 +106,25 @@ namespace StringCalculatorBLLTests
 
             //Assert
             Assert.True(exception.Message.Contains(expectedExceptionList));
+        }
+
+
+        [Fact]
+        public void TestBigString()
+        {
+            var maxNumber = 1000;
+            //Arrange
+            var sb = new StringBuilder();
+            for(var i=1; i < 10000; i++)
+            {
+                sb.Append(i+",");
+            }
+            //Act
+            var actualResult = _calculator.Add(sb.ToString());
+
+            var expected = maxNumber * (maxNumber + 1) / 2;
+            //Assert
+            Assert.Equal(expected, actualResult);
         }
 
     }

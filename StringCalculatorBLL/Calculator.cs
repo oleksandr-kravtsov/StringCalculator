@@ -7,6 +7,7 @@ namespace StringCalculatorBLL
     public class Calculator
     {
         private const string NegativeNumbersErrorMessage = "Calculation Failed. Negative numbers in input string: {0}";
+        private const int MaxNumberForCalculation = 1000;
         public long Add(string input)
         {
             if (string.IsNullOrWhiteSpace(input))
@@ -27,7 +28,7 @@ namespace StringCalculatorBLL
                 if (long.TryParse(s, out var number))
                 {
                     //in case we have some negative numbers, we should throw exception
-                    if (negativeNumbers.Count == 0)
+                    if (negativeNumbers.Count == 0 && number <= MaxNumberForCalculation)
                     {
                         sum += number;
                     }
