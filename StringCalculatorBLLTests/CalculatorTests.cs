@@ -1,4 +1,5 @@
-﻿using StringCalculatorBLL;
+﻿using System;
+using StringCalculatorBLL;
 using Xunit;
 
 namespace StringCalculatorBLLTests
@@ -12,12 +13,7 @@ namespace StringCalculatorBLLTests
         }
 
         [InlineData("20", 20)]
-        [InlineData("-20", -20)]
-        [InlineData("0,-5", -5)]
-        [InlineData(@"0\n-5", -5)]
         [InlineData("0,0", 0)]
-        [InlineData("-50,-100", -150)]
-        [InlineData(@"-50\n-100", -150)]
         [InlineData("1,5000", 5001)]
         [InlineData("5000000000,5000000000", 10000000000L)]
         [Theory]
@@ -58,9 +54,7 @@ namespace StringCalculatorBLLTests
         [InlineData("20,30,50", 100)]
         [InlineData(@"1\n2,3", 6)]
         [InlineData(@"20,30,50\n80", 180)]
-        [InlineData(@"\n20,30,50\n-110", -10)]
         [InlineData("1,2,3,4,5,6,7,8,9,10,11,12", 78)]
-        [InlineData("-1,-2,-3,-4,-5,-6,-7,-8,-9,-10,-11,-12", -78)]
         [InlineData("5000000000,5000000000,5000000000,5000000000", 20000000000L)]
         [Theory]
         public void MultiplePositiveAddTest(string input, long expectedResult)
@@ -91,6 +85,24 @@ namespace StringCalculatorBLLTests
 
             //Assert
             Assert.Equal(expectedResult, actualResult);
+        }
+
+        [InlineData("-20")]
+        [InlineData("0,-5","-5")]
+        [InlineData(@"0\n-5", "-5")]
+        [InlineData("-50,-100")]
+        [InlineData(@"-50\n-100", "-50,-100")]
+        [InlineData(@"\n20,30,50\n-110","-110")]
+        [InlineData("-1,-2,-3,-4,-5,-6,-7,-8,-9,-10,-11,-12")]
+        [InlineData(@"1,2,3,4,-5,6\n7,8,9","-5")]
+        [Theory]
+        public void ExceptionWhenNegativeNumbers(string input, string expectedExceptionList = "")
+        {
+            //Act
+            var exception = Assert.Throws<ArgumentException>(() => _calculator.Add(input));
+
+            //Assert
+            Assert.True(exception.Message.Contains(expectedExceptionList));
         }
 
     }
