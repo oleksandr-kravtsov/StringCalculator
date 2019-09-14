@@ -69,6 +69,13 @@ namespace StringCalculatorBLL
                 {
                     return input.Substring(2,1);
                 }
+
+                if (endDelimiter > 4 && input[2] == '[' && input[endDelimiter - 1] == ']')
+                {
+                    //between square brackets \\[*]\n
+                    return input.Substring(3, endDelimiter - 1 - 3);
+                }
+
             }
 
             return additionalDelimiter;

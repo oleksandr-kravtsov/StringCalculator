@@ -130,6 +130,8 @@ namespace StringCalculatorBLLTests
 
 
         [InlineData(@"//;\n2;5", 7)]
+        [InlineData(@"//[\n2[3", 5)]
+        [InlineData(@"//]\n2]4", 6)]
         [InlineData(@"// \n8 1", 9)]
         [InlineData(@"//#\n2#5,3\n10", 20)]
         [InlineData(@"//!\n2!5,3\n10;3", 10)]
@@ -152,6 +154,34 @@ namespace StringCalculatorBLLTests
         [InlineData(@"//;#\n2;5;3", 0)]
         [Theory]
         public void CustomSingleCharacterNegativeTest(string input, long expectedResult)
+        {
+            //Act
+            var actualResult = _calculator.Add(input);
+
+            //Assert
+            Assert.Equal(expectedResult, actualResult);
+        }
+
+
+        [InlineData(@"//[***]\n11***22***33", 66)]
+        [InlineData(@"//[      ]\n8      8\n", 16)]
+        [InlineData(@"//[~!@#$%^&*(]\n50~!@#$%^&*(,20\n5,", 75)]
+        [Theory]
+        public void CustomMultipleCharacterPositiveTest(string input, long expectedResult)
+        {
+            //Act
+            var actualResult = _calculator.Add(input);
+
+            //Assert
+            Assert.Equal(expectedResult, actualResult);
+        }
+
+        [InlineData(@"//[]\n1,2,3", 6)]
+        [InlineData(@"//[*]1;2\n3", 3)]
+        [InlineData(@"//[^^\n30^^40,1", 1)]
+        [InlineData(@"//___]\n30___40,2", 2)]
+        [Theory]
+        public void CustomMultipleCharacterNegativeTest(string input, long expectedResult)
         {
             //Act
             var actualResult = _calculator.Add(input);
