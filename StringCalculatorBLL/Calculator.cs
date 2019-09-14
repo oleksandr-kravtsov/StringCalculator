@@ -10,7 +10,7 @@ namespace StringCalculatorBLL
             {
                 return 0;
             }
-            var numbers = input.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries);
+            var numbers = input.Split(new[] {",",@"\n"}, StringSplitOptions.RemoveEmptyEntries);
             long sum = 0;
             foreach (var s in numbers)
             {
