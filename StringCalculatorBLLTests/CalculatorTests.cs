@@ -7,8 +7,6 @@ namespace StringCalculatorBLLTests
 {
     public class CalculatorTests
     {
-        private readonly Calculator _calculator = new Calculator();
-
         [InlineData("20", 20)]
         [InlineData("0,0", 0)]
         [InlineData("1,5000", 1)]
@@ -17,7 +15,7 @@ namespace StringCalculatorBLLTests
         public void SimplePositiveAddTest(string input, long expectedResult)
         {
             //Act
-            var actualResult = _calculator.Add(input);
+            var actualResult = Calculator.Add(input);
 
             //Assert
             Assert.Equal(expectedResult, actualResult);
@@ -41,7 +39,7 @@ namespace StringCalculatorBLLTests
         public void SimpleNegativeAddTest(string input, long expectedResult)
         {
             //Act
-            var actualResult = _calculator.Add(input);
+            var actualResult = Calculator.Add(input);
 
             //Assert
             Assert.Equal(expectedResult, actualResult);
@@ -59,7 +57,7 @@ namespace StringCalculatorBLLTests
         public void MultiplePositiveAddTest(string input, long expectedResult)
         {
             //Act
-            var actualResult = _calculator.Add(input);
+            var actualResult = Calculator.Add(input);
 
             //Assert
             Assert.Equal(expectedResult, actualResult);
@@ -80,7 +78,7 @@ namespace StringCalculatorBLLTests
         public void MultipleNegativeAddTest(string input, long expectedResult)
         {
             //Act
-            var actualResult = _calculator.Add(input);
+            var actualResult = Calculator.Add(input);
 
             //Assert
             Assert.Equal(expectedResult, actualResult);
@@ -98,7 +96,7 @@ namespace StringCalculatorBLLTests
         public void ExceptionWhenNegativeNumbersTest(string input, string expectedExceptionList = "")
         {
             //Act
-            var exception = Assert.Throws<ArgumentException>(() => _calculator.Add(input));
+            var exception = Assert.Throws<ArgumentException>(() => Calculator.Add(input));
 
             //Assert
             Assert.Contains(expectedExceptionList, exception.Message);
@@ -118,7 +116,7 @@ namespace StringCalculatorBLLTests
             var expected = maxNumber * (maxNumber + 1) / 2;
 
             //Act
-            var actualResult = _calculator.Add(sb.ToString());
+            var actualResult = Calculator.Add(sb.ToString());
             
             //Assert
             Assert.Equal(expected, actualResult);
@@ -135,7 +133,7 @@ namespace StringCalculatorBLLTests
         public void CustomSingleCharacterPositiveTest(string input, long expectedResult)
         {
             //Act
-            var actualResult = _calculator.Add(input);
+            var actualResult = Calculator.Add(input);
 
             //Assert
             Assert.Equal(expectedResult, actualResult);
@@ -152,7 +150,7 @@ namespace StringCalculatorBLLTests
         public void CustomSingleCharacterNegativeTest(string input, long expectedResult)
         {
             //Act
-            var actualResult = _calculator.Add(input);
+            var actualResult = Calculator.Add(input);
 
             //Assert
             Assert.Equal(expectedResult, actualResult);
@@ -166,7 +164,7 @@ namespace StringCalculatorBLLTests
         public void CustomMultipleCharacterPositiveTest(string input, long expectedResult)
         {
             //Act
-            var actualResult = _calculator.Add(input);
+            var actualResult = Calculator.Add(input);
 
             //Assert
             Assert.Equal(expectedResult, actualResult);
@@ -180,7 +178,7 @@ namespace StringCalculatorBLLTests
         public void CustomMultipleCharacterNegativeTest(string input, long expectedResult)
         {
             //Act
-            var actualResult = _calculator.Add(input);
+            var actualResult = Calculator.Add(input);
 
             //Assert
             Assert.Equal(expectedResult, actualResult);
@@ -194,7 +192,7 @@ namespace StringCalculatorBLLTests
         public void MultipleDelimitersPositiveTest(string input, long expectedResult)
         {
             //Act
-            var actualResult = _calculator.Add(input);
+            var actualResult = Calculator.Add(input);
 
             //Assert
             Assert.Equal(expectedResult, actualResult);
@@ -207,7 +205,7 @@ namespace StringCalculatorBLLTests
         public void MultipleDelimitersNegativeTest(string input, long expectedResult)
         {
             //Act
-            var actualResult = _calculator.Add(input);
+            var actualResult = Calculator.Add(input);
 
             //Assert
             Assert.Equal(expectedResult, actualResult);
@@ -225,6 +223,22 @@ namespace StringCalculatorBLLTests
 
             //Assert
             Assert.Equal(outputDelimiters, result);
+        }
+
+
+        [InlineData("//[&&]\n1&&2,3&4", 3, "1 + 2 + 0 = 3")]
+        [InlineData("10,aa,a7,5", 15, "10 + 0 + 0 + 5 = 15")]
+        [InlineData("//[&&][!!!]\n", 0, "")]
+        [InlineData("//[&&][!!!]\n ", 0, "0 = 0")]
+        [Theory]
+        public void TestAddWithFormula(string input, long expectedResult, string formula)
+        {
+            //Act
+            var actualResult = Calculator.AddWithFormula(input);
+
+            //Assert
+            Assert.Equal(expectedResult, actualResult.result);
+            Assert.Equal(formula, actualResult.formula);
         }
 
     }
