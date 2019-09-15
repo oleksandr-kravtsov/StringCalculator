@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace StringCalculatorBLL
 {
     public class Calculator
     {
         private const string NegativeNumbersErrorMessage = "Calculation Failed. Negative numbers in input string: {0}";
+        private const string DelimiterRegexPattern = @"\[(.*?)\]";
         private const int MaxNumberForCalculation = 1000;
+        
         public long Add(string input)
         {
             if (string.IsNullOrWhiteSpace(input))
@@ -15,12 +18,12 @@ namespace StringCalculatorBLL
                 return 0;
             }
 
-            var delimiters = new List<string>() {",", @"\n"};
+            var delimiters = new List<string>() {",", "\n"};
 
-            var additionalDelimiter = GetSingleDelimiterIfExist(input);
-            if (additionalDelimiter != string.Empty)
+            var additionalDelimiters = GetSingleDelimiterIfExist(input);
+            if (additionalDelimiters?.Count > 0)
             {
-                delimiters.Add(additionalDelimiter);
+                delimiters.AddRange(additionalDelimiters);
             }
 
             var numbers = input.Split(delimiters.ToArray(), StringSplitOptions.RemoveEmptyEntries);
@@ -58,27 +61,45 @@ namespace StringCalculatorBLL
             return sum;
         }
 
-        private static string GetSingleDelimiterIfExist(string input)
+        private static ICollection<string> GetSingleDelimiterIfExist(string input)
         {
-            string additionalDelimiter = string.Empty;
-            if (input.StartsWith(@"//"))
+            if (input.StartsWith("//"))
             {
-                var endDelimiter = input.IndexOf(@"\n", StringComparison.InvariantCulture);
+                var endDelimiter = input.IndexOf("\n", StringComparison.InvariantCulture);
 
+                //single character length delimiter
                 if (endDelimiter == 3)
                 {
-                    return input.Substring(2,1);
+                    return new[] {input.Substring(2, 1)};
                 }
 
-                if (endDelimiter > 4 && input[2] == '[' && input[endDelimiter - 1] == ']')
+                //minimum pattern \\[]\n
+                if (endDelimiter > 3)
                 {
-                    //between square brackets \\[*]\n
-                    return input.Substring(3, endDelimiter - 1 - 3);
+                    return ParseMultipleDelimiters(input.Substring(2, endDelimiter - 2));
                 }
-
             }
 
-            return additionalDelimiter;
+            return Enumerable.Empty<string>().ToArray();
         }
+
+        internal static ICollection<string> ParseMultipleDelimiters(string input)
+        {
+            var matches = Regex.Matches(input, DelimiterRegexPattern);
+
+            var additionalDelimiters = new List<string>();
+
+            foreach (Match match in matches)
+            {
+                if (match.Groups.Count > 1)
+                {
+                    additionalDelimiters.Add(match.Groups[1].Value);
+                }
+            }
+
+            return additionalDelimiters;
+        }
+
+
     }
 }
