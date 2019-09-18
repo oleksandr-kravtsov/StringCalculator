@@ -1,5 +1,7 @@
-﻿using StringCalculatorBLL;
+﻿using CommandLine;
+using StringCalculatorBLL;
 using System;
+using Unity;
 
 namespace StringCalculator
 {
@@ -7,32 +9,28 @@ namespace StringCalculator
     {
         static void Main(string[] args)
         {
-            var inputString = args?.Length > 0 ? args[0] : null;
-
-            if (string.IsNullOrEmpty(inputString))
-            {
-                ShowUsage();
-                return;
-            }
-
-            if (args?.Length > 1 && args[1] == "-disp")
-            {
-                var calcResult = Calculator.AddWithFormula(inputString);
-                Console.WriteLine("Result is {0}", calcResult.result);
-                Console.WriteLine("Formula is {0}", calcResult.formula);
-            }
-            else
-            {
-                Console.WriteLine("Result is {0}", Calculator.Add(inputString));
-            }
-           
+            Parser.Default.ParseArguments<CalculatorSettings>(args)
+                .WithParsed(RunApplication);
         }
 
-        private static void ShowUsage()
+        private static void RunApplication(CalculatorSettings settings)
         {
-            Console.WriteLine("Code Challenge - String Calculator");
-            Console.WriteLine("Usage: <input string with numbers> <additional arguments>");
-            Console.WriteLine("   -disp    display formula used to calculate result");
+            var container = UnityConfig.RegisterComponents();
+            RegisterSettings(container, settings);
+
+            var calculator = container.Resolve<ICalculator>();
+            var calcResult = calculator.Add();
+            Console.WriteLine("Result is {0}", calcResult.Result);
+
+            if (settings.DisplayFormula)
+            {
+                Console.WriteLine("Formula is {0}", calcResult.Formula);
+            }
+        }
+
+        private static void RegisterSettings(IUnityContainer container, ICalculatorSettings setting)
+        {
+            container.RegisterInstance<ICalculatorSettings>(setting);
         }
     }
 }

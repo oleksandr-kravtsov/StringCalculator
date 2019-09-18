@@ -1,36 +1,47 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
 namespace StringCalculatorBLL
 {
-    public class Calculator
+    public class Calculator : ICalculator
     {
         private const string NegativeNumbersErrorMessage = "Calculation Failed. Negative numbers in input string: {0}";
         private const string DelimiterRegexPattern = @"\[(.*?)\]";
-        private const int MaxNumberForCalculation = 1000;
+        private const int DefaultMaxNumberForCalculation = 1000;
 
-        public static long Add(string input)
+        private ICalculatorSettings Settings { get; }
+
+        private long MaxNumberForCalculation { get; }
+
+        public Calculator(ICalculatorSettings settings)
         {
-            return AddInternal(input).result;
+            Settings = settings;
+            MaxNumberForCalculation = settings.UpperBoundForNumbers ?? DefaultMaxNumberForCalculation;
         }
 
-
-        public static (long result, string formula) AddWithFormula(string input)
+        public CalculationResult Add()
         {
-            return AddInternal(input, true);
+            var result = AddInternal(Settings.InputString);
+            return new CalculationResult {Result = result.result, Formula = result.formula};
         }
 
-        private static (long result, string formula) AddInternal(string input, bool buildFormula = false)
+        private (long result, string formula) AddInternal(string input)
         {
             if (string.IsNullOrWhiteSpace(input))
             {
                 return (0, string.Empty);
             }
 
-            var delimiters = new List<string>() { ",", "\n" };
+            var delimiters = new List<string>() { ",", "\n"};
+
+            if (Settings.AlternateDelimiter.HasValue)
+            {
+                delimiters.Add(Settings.AlternateDelimiter.Value.ToString());
+            }
 
             var additionalDelimiters = GetAdditionalDelimitersIfExist(input);
             if (additionalDelimiters.delimiters?.Count > 0)
@@ -46,7 +57,6 @@ namespace StringCalculatorBLL
                 {
                     // \n is last character, return 
                     return (0, string.Empty);
-
                 }
             }
 
@@ -55,34 +65,33 @@ namespace StringCalculatorBLL
             return SumInternal(numbers);
         }
 
-        private static (long result, string formula) SumInternal(IEnumerable<string> numbers, bool buildFormula = false)
+        private (long result, string formula) SumInternal(IEnumerable<string> numbers)
         {
             long sum = 0;
             var negativeNumbers = new List<long>();
             var sbDisplay = new StringBuilder();
+            
             foreach (var s in numbers)
             {
+                var strNumber = "0";
                 if (long.TryParse(s, out var number))
                 {
                     //in case we have some negative numbers, we should throw exception
                     if (negativeNumbers.Count == 0 && number <= MaxNumberForCalculation)
                     {
                         sum += number;
-                        sbDisplay.Append(number + " + ");
-                    }
-                    else
-                    {
-                        sbDisplay.Append("0 + ");
+                        strNumber = number.ToString();
                     }
 
-                    if (number < 0)
+                    if (!Settings.DoNotIgnoreNegatives && number < 0)
                     {
                         negativeNumbers.Add(number);
                     }
                 }
-                else
+
+                if (Settings.DisplayFormula)
                 {
-                    sbDisplay.Append("0 + ");
+                    sbDisplay.Append(strNumber + " + ");
                 }
             }
 
